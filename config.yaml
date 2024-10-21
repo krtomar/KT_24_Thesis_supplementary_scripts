@@ -1,0 +1,6 @@
+rawDataDir: .
+genomeScFTP: ftp://ftp.ensembl.org/pub/release-91/fasta/saccharomyces_cerevisiae/dna/Saccharomyces_cerevisiae.R64-1-1.dna.toplevel.fa.gz
+genomeSpFTP: ftp://ftp.ensemblgenomes.org/pub/fungi/release-37/fasta/schizosaccharomyces_pombe/dna/Schizosaccharomyces_pombe.ASM294v2.dna.toplevel.fa.gz
+genomeEcFTP: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/723/505/GCF_001723505.1_ASM172350v1/GCF_001723505.1_ASM172350v1_genomic.fna.gz
+gtfScFTP: ftp://ftp.ensembl.org/pub/release-91/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.91.gtf.gz
+gtfSpFTP: ftp://ftp.ensemblgenomes.org/pub/fungi/release-37/gtf/schizosaccharomyces_pombe/Schizosaccharomyces_pombe.ASM294v2.37.gtf.gz

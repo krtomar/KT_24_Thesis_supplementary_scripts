@@ -1,0 +1,11 @@
+{
+    "__default__" :
+    {
+      "c" : 16,
+      "partition" : "cpu_p",
+      "q" : "cpu_normal",
+      "constraint" : "Lustre_File_System",
+      "time" : "72:00:00",
+      "mem": "32G",
+    },
+}

@@ -1,0 +1,14 @@
+
+
+
+args <- c("genome/combined.gtf", "SampleTable.txt", 
+          "Output/BAM/L117322.ReadsPerGene.out.tab", "Output/BAM/L117323.ReadsPerGene.out.tab", "Output/BAM/L117324.ReadsPerGene.out.tab", "Output/BAM/L117325.ReadsPerGene.out.tab", "Output/BAM/L117326.ReadsPerGene.out.tab", "Output/BAM/L117327.ReadsPerGene.out.tab", "Output/BAM/L117328.ReadsPerGene.out.tab", "Output/BAM/L117329.ReadsPerGene.out.tab", "Output/BAM/L117330.ReadsPerGene.out.tab", "Output/BAM/L117331.ReadsPerGene.out.tab", "Output/BAM/L117332.ReadsPerGene.out.tab",
+          "Output/BAM/L117333.ReadsPerGene.out.tab", "Output/BAM/L117334.ReadsPerGene.out.tab", "Output/BAM/L117335.ReadsPerGene.out.tab", "Output/BAM/L117336.ReadsPerGene.out.tab", "Output/BAM/L117337.ReadsPerGene.out.tab", "Output/BAM/L117338.ReadsPerGene.out.tab", "Output/BAM/L117339.ReadsPerGene.out.tab", "Output/BAM/L117340.ReadsPerGene.out.tab", "Output/BAM/L117341.ReadsPerGene.out.tab", "Output/BAM/L117342.ReadsPerGene.out.tab", "Output/BAM/L117343.ReadsPerGene.out.tab", 
+          "Output/BAM/L117344.ReadsPerGene.out.tab", "Output/BAM/L117345.ReadsPerGene.out.tab", "Output/BAM/L117346.ReadsPerGene.out.tab", "Output/BAM/L117347.ReadsPerGene.out.tab", "Output/BAM/L117348.ReadsPerGene.out.tab", "Output/BAM/L117349.ReadsPerGene.out.tab", "Output/BAM/L122018.ReadsPerGene.out.tab", "Output/BAM/L122019.ReadsPerGene.out.tab", "Output/BAM/L122020.ReadsPerGene.out.tab", "Output/BAM/L122021.ReadsPerGene.out.tab", "Output/BAM/L122022.ReadsPerGene.out.tab", 
+          "Output/BAM/L122023.ReadsPerGene.out.tab", "Output/BAM/L122024.ReadsPerGene.out.tab", "Output/BAM/L122025.ReadsPerGene.out.tab", "Output/BAM/L122026.ReadsPerGene.out.tab", "Output/BAM/L122027.ReadsPerGene.out.tab", "Output/BAM/L122028.ReadsPerGene.out.tab", "Output/BAM/L122029.ReadsPerGene.out.tab", "Output/BAM/L122030.ReadsPerGene.out.tab", "Output/BAM/L122031.ReadsPerGene.out.tab", "Output/BAM/L122032.ReadsPerGene.out.tab", "Output/BAM/L122033.ReadsPerGene.out.tab",
+          "Output/BAM/L122034.ReadsPerGene.out.tab", "Output/BAM/L122035.ReadsPerGene.out.tab", "Output/BAM/L122036.ReadsPerGene.out.tab", "Output/BAM/L122037.ReadsPerGene.out.tab", "Output/BAM/L122038.ReadsPerGene.out.tab", "Output/BAM/L122039.ReadsPerGene.out.tab", "Output/BAM/L122040.ReadsPerGene.out.tab", "Output/BAM/L122041.ReadsPerGene.out.tab", "Output/BAM/L122042.ReadsPerGene.out.tab", "Output/BAM/L122043.ReadsPerGene.out.tab", "Output/BAM/L122044.ReadsPerGene.out.tab", 
+          "Output/BAM/L122045.ReadsPerGene.out.tab",
+          "Spom", "Output/deseq2_SpomNorm/tables/log2_norm_counts.txt", "Output/deseq2_SpomNorm/plots/PCA.pdf", "Output/deseq2_SpomNorm/sessionInfo.txt")
+
+
+args <- c("genome/combined.gtf", "SampleTable.txt", "Output/deseq2_SpomNorm/tables/log2_norm_counts.txt", "Output/matrix/L122023_TSS_matrix.rds", "Output/matrix/L122030_TSS_matrix.rds", "Output/composite/pairs/composite.pullout_25.0_dataset15.pdf")

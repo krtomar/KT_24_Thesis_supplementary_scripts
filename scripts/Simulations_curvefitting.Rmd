@@ -1,0 +1,599 @@
+---
+title: "Data Simulations"
+author: Tamas Schauer
+date: "`r Sys.Date()`"
+output: 
+        html_document:
+                code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+---
+
+##### Asymptotic exponential function
+```{r class.source = 'fold-show'}
+formulaExpo <- function(x, a, b, c){
+        
+                y <- c+a*(1-exp(-b*x))
+                
+                y
+}
+```
+
+##### Logistic function
+
+```{r class.source = 'fold-show'}
+formulaLogi <- function(x, a, b, xmid){
+        
+                y <- a/(1+exp(-b*(x-xmid)))
+                
+                y
+}
+```
+
+##### Generate negative binomial counts
+
+```{r class.source = 'fold-show'}
+simCounts <- function(y){
+        
+        # original in DESeq2: 4/y + 0.1 (too noisy for us)
+        dispersion <- 1/y + 0.05
+        
+        rnbinom(n = length(y), mu = y, size = 1/dispersion)
+}
+
+```
+
+
+## Exponential Asymptote
+
+---
+
+#### Generate data
+```{r}
+x <- seq(0,45,0.1)
+
+a0 <- 100
+b0 <- 0.075
+c0 <- 2
+
+y_true <- formulaExpo(x = x, a = a0, b = b0, c = c0)
+
+set.seed(3)
+cnts <- simCounts(y_true)
+```
+
+#### Fit asymptotic exponential 
+```{r}
+df <- data.frame(x = x, y = cnts)
+
+fit1 <- nls(y ~ formulaExpo(x, a, b, c), 
+            data = df, start = list(a = a0, b = b0, c = c0), 
+            control = nls.control(maxiter = 1000))
+
+a1 <- coef(fit1)[1]
+b1 <- coef(fit1)[2]
+c1 <- coef(fit1)[3]
+
+y_fit1 <- formulaExpo(x = x, a = a1, b = b1, c = c1)
+```
+
+#### Fit logistic function
+
+```{r}
+fit2 <- nls(y ~ formulaLogi(x, a, b, xmid), 
+            data = df, start = list(a = a0, b = b0, xmid = 15), 
+            control = nls.control(maxiter = 1000))
+
+a2 <- coef(fit2)[1]
+b2 <- coef(fit2)[2]
+xmid <- coef(fit2)[3]
+
+y_fit2 <- formulaLogi(x = x, a = a2, b = b2, xmid = xmid)
+
+```
+
+#### Plot
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+plot(x, cnts, ylim = c(0, a0*1.5),
+     col = "grey", pch = 19, cex = 0.75)
+
+lines(x, y_true, col = "black", lwd = 4)
+lines(x, y_fit1, lty=1, col = "blue1", lwd = 2)
+lines(x, y_fit2, col = "red3", lwd = 2)
+
+plot.new()
+legend("left", lwd = 3,
+       legend = c("true","expo fit","logi fit"),
+       col = c("black", "blue1","red3"))
+```
+
+
+## Logistic curve
+
+---
+
+#### Generate data
+
+```{r}
+x <- seq(0,45,0.1)
+
+a0 <- 100
+b0 <- 0.2
+xmid = 15
+
+y_true <- formulaLogi(x = x, a = a0, b = b0, xmid = xmid)
+
+set.seed(3)
+cnts <- simCounts(y_true)
+```
+
+#### Fit asymptotic exponential 
+
+```{r}
+df <- data.frame(x = x, y = cnts)
+
+fit1 <- nls(y ~ formulaExpo(x, a, b, c), 
+            data = df, start = list(a = a0, b = b0, c = c0), 
+            control = nls.control(maxiter = 1000))
+
+a1 <- coef(fit1)[1]
+b1 <- coef(fit1)[2]
+c1 <- coef(fit1)[3]
+
+y_fit1 <-formulaExpo(x = x, a = a1, b = b1, c = c1)
+```
+
+#### Fit logistic function
+
+```{r}
+fit2 <- nls(y ~ formulaLogi(x, a, b, xmid), 
+            data = df, start = list(a = a0, b = b0, xmid = xmid), 
+            control = nls.control(maxiter = 1000))
+
+a2 <- coef(fit2)[1]
+b2 <- coef(fit2)[2]
+xmid <- coef(fit2)[3]
+
+y_fit2 <- formulaLogi(x = x, a = a2, b = b2, xmid = xmid)
+
+```
+
+#### Plot
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+plot(x, cnts, ylim = c(0, a0*1.5),
+     col = "grey", pch = 19, cex = 0.75)
+
+lines(x, y_true, col = "black", lwd = 4)
+lines(x, y_fit1, lty=1, col = "blue1", lwd = 2)
+lines(x, y_fit2, col = "red3", lwd = 2)
+
+plot.new()
+legend("left", lwd = 3,
+       legend = c("true","expo fit","logi fit"),
+       col = c("black", "blue1","red3"))
+```
+
+## Inference 1
+
+---
+
+#### Data params (no difference)
+
+```{r}
+x <- rep(c(0, 1.5, 3, 6, 12, 25, 45), 3)
+
+a0 <- 2000
+b0 <- 0.15
+xmid0 = 15
+
+y_true <- formulaLogi(x = x, a = a0, b = b0, xmid = xmid0)
+
+set.seed(5)
+
+cnts1 <- simCounts(y_true)
+cnts2 <- simCounts(y_true)
+
+df <- data.frame(x = c(x,x),
+                 y = c(cnts1,cnts2),
+                 v = rep(c(1,2), each = length(x)))
+```
+
+#### Fit full modell
+
+```{r}
+fitfull <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]),
+               data = df,
+               start = as.data.frame(rbind(c(a = a0, b = b0, xmid = xmid0),
+                                           c(a = a0, b = b0, xmid = xmid0))),
+               control =  nls.control(maxiter = 1000, tol = 0.1),
+               subset = v %in% 1:2)
+
+summary(fitfull)
+```
+
+
+#### Fit null modell
+
+```{r}
+fitnull <- nls(y ~ formulaLogi(x, a, b, xmid),
+               data = df,
+               start = list(a = a0, b = b0, xmid = xmid0),
+               control =  nls.control(maxiter = 1000, tol = 0.1),
+               subset = v %in% 1:2)
+
+summary(fitnull)
+```
+
+
+#### NLS without Weights
+
+```{r}
+set.seed(4)
+
+pvals <- replicate(n = 1000, expr = {
+        
+        
+        cnts1 <- simCounts(y_true)
+        cnts2 <- simCounts(y_true)
+        
+        df <- data.frame(x = c(x,x),
+                         y = c(cnts1,cnts2),
+                         v = rep(c(1,2), each = length(x)))
+        
+        fitv1 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a0, b = b0, xmid = xmid0), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 1)
+        
+        fitv2 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a0, b = b0, xmid = xmid0), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 2)
+        
+        fitfull <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                        data = df, 
+                        start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        fitnull <- nls(y ~ formulaLogi(x, a, b, xmid),
+                        data =  df,
+                        start = colMeans(as.data.frame(rbind(coef(fitv1), coef(fitv2)))), 
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        anova(fitnull, fitfull)[2,6]
+})
+```
+
+P-Values should be uniform but they are not
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+hist(pvals, breaks = 20)
+```
+
+
+#### Weighted NLS
+
+```{r}
+set.seed(5)
+
+pvals <- replicate(n = 1000, expr = {
+        
+        cnts1 <- simCounts(y_true)
+        cnts2 <- simCounts(y_true)
+        
+        df <- data.frame(x = c(x,x),
+                         y = c(cnts1,cnts2),
+                         v = rep(c(1,2), each = length(x)))
+        
+        fitv1 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a0, b = b0, xmid = xmid0), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 1)
+        
+        
+        fitv2 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a0, b = b0, xmid = xmid0), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 2)
+        
+        fitfull0 <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                        data = df, 
+                        start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        df$weights <- 1/(fitted(fitfull0)^2)
+        
+        fitfull <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                       data = df, 
+                       start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                       control =  nls.control(maxiter = 1000, tol = 0.1),
+                       weights = weights,
+                       subset = v %in% 1:2)
+        
+        fitnull <- nls(y ~ formulaLogi(x, a, b, xmid),
+                       data =  df,
+                       start = colMeans(as.data.frame(rbind(coef(fitv1), coef(fitv2)))), 
+                       control =  nls.control(maxiter = 1000, tol = 0.1),
+                       weights = weights,
+                       subset = v %in% 1:2)
+        
+        anova(fitnull, fitfull)[2,6]
+})
+```
+
+P-Values should be uniform and they are
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+hist(pvals, breaks = 20)
+```
+
+
+## Inference 2
+
+---
+
+#### Data params (with difference in asymptote)
+
+```{r}
+x <- rep(c(0, 1.5, 3, 6, 12, 25, 45), 3)
+
+a1 <- 2000
+b1 <- 0.18
+xmid1 = 15
+
+a2 <- 1000
+b2 <- 0.18
+xmid2 = 15
+
+y_true1 <- formulaLogi(x = x, a = a1, b = b1, xmid = xmid1)
+y_true2 <- formulaLogi(x = x, a = a2, b = b2, xmid = xmid2)
+
+set.seed(9)
+
+cnts1 <- simCounts(y_true1)
+cnts2 <- simCounts(y_true2)
+
+
+df <- data.frame(x = c(x,x),
+                 y = c(cnts1,cnts2),
+                 v = rep(c(1,2), each = length(x)))
+
+fitv1 <- nls(y ~ formulaLogi(x, a, b, xmid),
+             data =  df,
+             start = list(a = a1, b = b1, xmid = xmid1), 
+             control =  nls.control(maxiter = 1000, tol = 0.1),
+             subset = v == 1)
+
+
+fitv2 <- nls(y ~ formulaLogi(x, a, b, xmid),
+             data =  df,
+             start = list(a = a2, b = b2, xmid = xmid2), 
+             control =  nls.control(maxiter = 1000, tol = 0.1),
+             subset = v == 2)
+```
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+
+plot(x, cnts1, ylim = c(0,3000),
+     col = "grey", pch = 19, cex = 0.75)
+
+lines(seq(0,45,0.01), predict(fitv1, newdata = data.frame(x = seq(0,45,0.01))))
+
+plot(x, cnts2, ylim = c(0,3000),
+     col = "grey", pch = 19, cex = 0.75)
+
+lines(seq(0,45,0.01), predict(fitv2, newdata = data.frame(x = seq(0,45,0.01))))
+```
+
+#### Test difference of the curves (overall)
+
+```{r}
+set.seed(5)
+
+pvals <- replicate(n = 1000, expr = {
+        
+        cnts1 <- simCounts(y_true1)
+        cnts2 <- simCounts(y_true2)
+        
+        df <- data.frame(x = c(x,x),
+                         y = c(cnts1,cnts2),
+                         v = rep(c(1,2), each = length(x)))
+        
+        fitv1 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a1, b = b1, xmid = xmid1), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 1)
+        
+        fitv2 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a2, b = b2, xmid = xmid2), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 2)
+        
+        fitfull0 <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                        data = df, 
+                        start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        df$weights <- 1/(fitted(fitfull0)^2)
+        
+        fitfull <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                       data = df, 
+                       start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                       control =  nls.control(maxiter = 1000, tol = 0.1),
+                       weights = weights,
+                       subset = v %in% 1:2)
+        
+        fitnull <- nls(y ~ formulaLogi(x, a, b, xmid),
+                       data =  df,
+                       start = colMeans(as.data.frame(rbind(coef(fitv1), coef(fitv2)))), 
+                       control =  nls.control(maxiter = 1000, tol = 0.1),
+                       weights = weights,
+                       subset = v %in% 1:2)
+        
+        anova(fitnull, fitfull)[2,6]
+})
+```
+
+P-Values should not be uniform
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+hist(pvals, breaks = 20)
+```
+
+
+#### Test only rate parameter (not different)
+
+```{r}
+set.seed(4)
+
+pvals <- replicate(n = 1000, expr = {
+        
+        cnts1 <- simCounts(y_true1)
+        cnts2 <- simCounts(y_true2)
+        
+        df <- data.frame(x = c(x,x),
+                         y = c(cnts1,cnts2),
+                         v = rep(c(1,2), each = length(x)))
+        
+        fitv1 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a1, b = b1, xmid = xmid1), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 1)
+        
+        fitv2 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a2, b = b2, xmid = xmid2), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 2)
+        
+        fitfull0 <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                        data = df, 
+                        start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        df$weights <- 1/(fitted(fitfull0)^2)
+        
+        fitfull <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                       data = df, 
+                       start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                       control =  nls.control(maxiter = 1000, tol = 0.1),
+                       weights = weights,
+                       subset = v %in% 1:2)
+        
+        fit2rate <- nls(y ~ formulaLogi(x, a[v], b, xmid[v]), 
+                        data = df, 
+                        start = c(b = mean(coef(fitv1)[2], coef(fitv2)[2]),
+                                  as.data.frame(rbind(coef(fitv1)[-2], coef(fitv2)[-2]))), 
+                        weights = weights,
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        anova(fit2rate, fitfull)[2,6]
+})
+```
+
+P-Values should be uniform
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+hist(pvals, breaks = 20)
+```
+
+#### Test only asymptote parameter (different)
+
+```{r}
+set.seed(4)
+
+pvals <- replicate(n = 1000, expr = {
+        
+        cnts1 <- simCounts(y_true1)
+        cnts2 <- simCounts(y_true2)
+        
+        df <- data.frame(x = c(x,x),
+                         y = c(cnts1,cnts2),
+                         v = rep(c(1,2), each = length(x)))
+        
+        fitv1 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a1, b = b1, xmid = xmid1), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 1)
+        
+        fitv2 <- nls(y ~ formulaLogi(x, a, b, xmid),
+                     data =  df,
+                     start = list(a = a2, b = b2, xmid = xmid2), 
+                     control =  nls.control(maxiter = 1000, tol = 0.1),
+                     subset = v == 2)
+        
+        fitfull0 <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                        data = df, 
+                        start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        df$weights <- 1/(fitted(fitfull0)^2)
+        
+        fitfull <- nls(y ~ formulaLogi(x, a[v], b[v], xmid[v]), 
+                       data = df, 
+                       start = as.data.frame(rbind(coef(fitv1), coef(fitv2))), 
+                       control =  nls.control(maxiter = 1000, tol = 0.1),
+                       weights = weights,
+                       subset = v %in% 1:2)
+        
+        fit2asym <- nls(y ~ formulaLogi(x, a, b[v], xmid[v]), 
+                        data = df, 
+                        start = c(a = mean(coef(fitv1)[1], coef(fitv2)[1]),
+                                  as.data.frame(rbind(coef(fitv1)[-1], coef(fitv2)[-1]))), 
+                        weights = weights,
+                        control =  nls.control(maxiter = 1000, tol = 0.1),
+                        subset = v %in% 1:2)
+        
+        anova(fit2asym, fitfull)[2,6]
+})
+```
+
+P-Values should not be uniform
+
+```{r fig.align='center', fig.height=5, fig.width=9}
+par(mfrow=c(1,2), mar=c(4,4,1,1), mgp = c(2.25,1,0), oma = c(2,2,2,2))
+
+hist(pvals, breaks = 20)
+
+```
+
+
+
+
